@@ -5,7 +5,7 @@ struct MessageBubbleView: View {
     let isCurrentUser: Bool
 
     var body: some View {
-        Group {
+        SwiftUI.Group {
             switch message.type {
             case .text:
                 textBubble

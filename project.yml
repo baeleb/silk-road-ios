@@ -29,12 +29,9 @@ targets:
     platform: iOS
     sources:
       - path: SilkRoad
-        excludes:
-          - "Resources/GoogleService-Info.plist"
     resources:
       - path: SilkRoad/Resources/Assets.xcassets
       - path: SilkRoad/Resources/GoogleService-Info.plist
-        optional: true
     dependencies:
       - package: Firebase
         product: FirebaseAuth
@@ -48,14 +45,15 @@ targets:
         product: GoogleSignIn
       - package: GoogleSignIn
         product: GoogleSignInSwift
-      - framework: CarPlay.framework
-      - framework: MapKit.framework
-      - framework: CoreLocation.framework
-      - framework: AuthenticationServices.framework
+      - sdk: CarPlay.framework
+      - sdk: MapKit.framework
+      - sdk: CoreLocation.framework
+      - sdk: AuthenticationServices.framework
     settings:
       base:
         INFOPLIST_FILE: SilkRoad/Resources/Info.plist
         CODE_SIGN_ENTITLEMENTS: SilkRoad/Resources/SilkRoad.entitlements
+        ENTITLEMENTS_REQUIRED: YES
     info:
       path: SilkRoad/Resources/Info.plist
       properties:
@@ -63,12 +61,16 @@ targets:
         CFBundleName: SilkRoad
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
+        CFBundleURLTypes:
+          - CFBundleURLSchemes:
+              - "com.googleusercontent.apps.dummy"
         UILaunchScreen: {}
         NSLocationWhenInUseUsageDescription: "Silk Road needs your location to navigate and share your position with your caravan."
         NSLocationAlwaysAndWhenInUseUsageDescription: "Silk Road needs background location access to keep tracking your position during navigation."
         UIBackgroundModes:
           - location
           - remote-notification
+          - audio
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: true
           UISceneConfigurations:
@@ -79,4 +81,5 @@ targets:
       path: SilkRoad/Resources/SilkRoad.entitlements
       properties:
         com.apple.developer.carplay-maps: true
+        com.apple.developer.applesignin: ["Default"]
         aps-environment: development

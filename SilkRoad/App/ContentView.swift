@@ -4,7 +4,7 @@ struct ContentView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
 
     var body: some View {
-        Group {
+        SwiftUI.Group {
             if authViewModel.isLoading {
                 LaunchView()
             } else if authViewModel.currentUser != nil {

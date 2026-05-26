@@ -4,7 +4,7 @@ struct ManeuverBannerView: View {
     let navigationState: NavigationState
 
     var body: some View {
-        Group {
+        SwiftUI.Group {
             switch navigationState.phase {
             case .navigating, .rerouting:
                 activeBanner

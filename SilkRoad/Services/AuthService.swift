@@ -6,6 +6,7 @@ import CryptoKit
 
 // MARK: - Protocol
 
+@MainActor
 protocol AuthServiceProtocol {
     var currentUser: AppUser? { get }
     func signInWithEmail(email: String, password: String) async throws -> AppUser

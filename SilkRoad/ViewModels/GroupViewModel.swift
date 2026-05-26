@@ -13,9 +13,10 @@ class GroupViewModel: ObservableObject {
     let chatService = ChatService()
     let fileService = FileStorageService()
 
-    init(groupService: GroupService = GroupService()) {
-        self.groupService = groupService
-        groupService.listenToUserGroups()
+    init(groupService: GroupService? = nil) {
+        let service = groupService ?? GroupService()
+        self.groupService = service
+        service.listenToUserGroups()
     }
 
     // MARK: - Group Management

@@ -16,12 +16,6 @@ class CarPlayNavigationManager {
 
     func startNavigation(session: CPNavigationSession) {
         self.navigationSession = session
-
-        // Initial loading state
-        session.pauseTrip(for: .loading, description: "Starting navigation...")
-
-        // Resume after setup
-        session.resumeTrip(updatedRouteInformation: nil)
     }
 
     func stopNavigation() {
@@ -76,7 +70,7 @@ class CarPlayNavigationManager {
     }
 
     func handleRerouteComplete() {
-        navigationSession?.resumeTrip(updatedRouteInformation: nil)
+        // Trip is automatically resumed by updating maneuvers
     }
 
     func handleArrival() {
@@ -114,7 +108,7 @@ class CarPlayNavigationManager {
 
     /// Presents a trip preview on the map template.
     func presentTripPreview(trip: CPTrip) {
-        mapTemplate?.showTripPreviews([trip])
+        mapTemplate?.showTripPreviews([trip], textConfiguration: nil)
     }
 
     // MARK: - Private Helpers

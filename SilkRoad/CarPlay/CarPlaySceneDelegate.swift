@@ -25,6 +25,7 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
         // Setup map view controller
         let mapVC = CarPlayMapController()
         window.rootViewController = mapVC
+        window.makeKeyAndVisible()
         self.mapViewController = mapVC
 
         // Setup navigation manager
@@ -35,9 +36,15 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
         self.navigationManager = navManager
 
         // Add navigation bar buttons
-        setupMapButtons(mapTemplate: mapTemplate)
+        // setupMapButtons(mapTemplate: mapTemplate)
 
-        interfaceController.setRootTemplate(mapTemplate, animated: true, completion: nil)
+        let item = CPGridButton(titleVariants: ["Open Map"], image: UIImage(systemName: "map")!) { [weak self] _ in
+            guard let self = self, let mapTemplate = self.mapTemplate else { return }
+            self.interfaceController?.pushTemplate(mapTemplate, animated: true, completion: nil)
+        }
+        let gridTemplate = CPGridTemplate(title: "Silk Road", gridButtons: [item])
+
+        interfaceController.setRootTemplate(gridTemplate, animated: true, completion: nil)
     }
 
     func templateApplicationScene(
@@ -75,10 +82,9 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
         mapTemplate.mapButtons = [zoomIn, zoomOut, recenter]
 
         // Navigation bar: show caravan status
-        let caravanButton = CPBarButton(title: "Caravan") { _ in
-            // Could show caravan status list
-        }
-        mapTemplate.leadingNavigationBarButtons = [caravanButton]
+        // CPMapTemplate manages its own navigation bar, setting these can cause internal crashes!
+        // let caravanButton = CPBarButton(title: "Caravan") { _ in }
+        // mapTemplate.leadingNavigationBarButtons = [caravanButton]
     }
 }
 
