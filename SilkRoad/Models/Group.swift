@@ -12,6 +12,9 @@ struct Group: Identifiable, Codable, Equatable, Hashable {
     var routePolyline: String?
     var isNavigating: Bool
     var createdAt: Date
+    // Optional for backward compatibility: groups created before the
+    // membership-query refactor don't have this field in Firestore.
+    var memberIds: [String]?
 
     var hasDestination: Bool {
         destinationLatitude != nil && destinationLongitude != nil
@@ -27,7 +30,8 @@ struct Group: Identifiable, Codable, Equatable, Hashable {
         destinationName: String? = nil,
         routePolyline: String? = nil,
         isNavigating: Bool = false,
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        memberIds: [String]? = nil
     ) {
         self.id = id
         self.name = name
@@ -39,5 +43,6 @@ struct Group: Identifiable, Codable, Equatable, Hashable {
         self.routePolyline = routePolyline
         self.isNavigating = isNavigating
         self.createdAt = createdAt
+        self.memberIds = memberIds
     }
 }

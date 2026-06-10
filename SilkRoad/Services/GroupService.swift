@@ -35,7 +35,8 @@ class GroupService: ObservableObject {
             inviteCode: inviteCode,
             createdBy: userId,
             isNavigating: false,
-            createdAt: Date()
+            createdAt: Date(),
+            memberIds: [userId]
         )
 
         let docRef = try db.collection("groups").addDocument(from: group)
@@ -87,6 +88,9 @@ class GroupService: ObservableObject {
             currentStepIndex: 0
         )
         try doc.reference.collection("members").document(userId).setData(from: member)
+        try await doc.reference.updateData([
+            "memberIds": FieldValue.arrayUnion([userId])
+        ])
 
         return group
     }
@@ -98,6 +102,9 @@ class GroupService: ObservableObject {
 
         try await db.collection("groups").document(groupId)
             .collection("members").document(userId).delete()
+        try await db.collection("groups").document(groupId).updateData([
+            "memberIds": FieldValue.arrayRemove([userId])
+        ])
 
         // Check if any members remain
         let remaining = try await db.collection("groups").document(groupId)
@@ -143,32 +150,15 @@ class GroupService: ObservableObject {
     func listenToUserGroups() {
         guard let userId = Auth.auth().currentUser?.uid else { return }
 
-        // Listen to all groups where user is the creator
-        // NOTE: For a production app, you'd maintain a user→groups mapping
-        // For now, we query groups collection and check membership client-side
+        // Sorting happens client-side: combining arrayContains with a
+        // server-side order(by:) would require a composite index.
         groupsListener = db.collection("groups")
-            .order(by: "createdAt", descending: true)
+            .whereField("memberIds", arrayContains: userId)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let documents = snapshot?.documents else { return }
-
-                Task { @MainActor [weak self] in
-                    var groups: [Group] = []
-                    for doc in documents {
-                        // Check if user is a member
-                        do {
-                            let memberDoc = try await doc.reference.collection("members")
-                                .document(userId).getDocument()
-                            if memberDoc.exists {
-                                if let group = try? doc.data(as: Group.self) {
-                                    groups.append(group)
-                                }
-                            }
-                        } catch {
-                            continue
-                        }
-                    }
-                    self?.userGroups = groups
-                }
+                self?.userGroups = documents
+                    .compactMap { try? $0.data(as: Group.self) }
+                    .sorted { $0.createdAt > $1.createdAt }
             }
     }
 
@@ -221,6 +211,19 @@ class GroupService: ObservableObject {
                 "status": status.rawValue,
                 "currentStepIndex": stepIndex
             ])
+    }
+
+    /// Updates only the status field of another member's document
+    /// (used by the caravan monitor, which evaluates members other than
+    /// the current user).
+    func updateMemberStatus(
+        groupId: String,
+        memberId: String,
+        status: DriverStatus
+    ) async throws {
+        try await db.collection("groups").document(groupId)
+            .collection("members").document(memberId)
+            .updateData(["status": status.rawValue])
     }
 
     // MARK: - QR Code Generation
